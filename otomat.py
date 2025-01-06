@@ -3,6 +3,9 @@ from tkinter import messagebox
 from PIL import Image, ImageTk
 import qrcode
 
+secili_urunler_stack = []
+secili_urunler_etiketleri = []  
+
 def qr_kodu_olustur():
     qr_verisi = "https://payment-portal.example.com"
     qr = qrcode.QRCode(version=1, box_size=10, border=5)
@@ -49,10 +52,28 @@ def sepete_ekle(urun_adi, urun_fiyati):
         messagebox.showwarning("Uyarı", "Sepet dolu! Daha fazla ürün eklenemez.")
         return
 
+    secili_urunler_stack.append((urun_adi, urun_fiyati))
+
     urun_etiketi = tk.Label(secim_cercevesi, text=f"{urun_adi} - {urun_fiyati}", bg="white", font=("Arial", 10))
     urun_etiketi.grid(row=satir, column=kol, padx=5, pady=5)
     secili_urunler_listesi.insert(tk.END, f"{urun_adi} - {urun_fiyati}")
+    secili_urunler_etiketleri.append(urun_etiketi)
+
     toplam_fiyati_guncelle()
+
+def geri_urun_al():
+    if secili_urunler_stack:
+        urun_adi, urun_fiyati = secili_urunler_stack.pop()
+        
+        secili_urunler_listesi.delete(tk.END)
+
+        if secili_urunler_etiketleri:
+            son_etiket = secili_urunler_etiketleri.pop()  
+            son_etiket.destroy()  
+
+        toplam_fiyati_guncelle()
+    else:
+        messagebox.showwarning("Uyarı", "Sepet boş, geri alınacak ürün yok!")
 
 def toplam_fiyati_guncelle():
     toplam = 0
@@ -119,5 +140,6 @@ toplam_fiyat_etiketi.place(x=475, y=298)
 
 tk.Button(kok, text="QR", command=qr_ile_odeme, bg="lightgreen", font=("Arial", 12), width=5, height=4).place(x=470, y=180)
 tk.Button(kok, text="Kredi Kart", command=kart_ile_odeme, bg="lightblue", font=("Arial", 12), width=8, height=2).place(x=455, y=490)
+tk.Button(kok, text="Geri Al", command=geri_urun_al, bg="lightcoral", font=("Arial", 12), width=8, height=2).place(x=455, y=430)
 
 kok.mainloop()
